@@ -1,3 +1,5 @@
+from urllib import response
+from django.shortcuts import get_object_or_404
 from pickle import GET
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -24,15 +26,18 @@ def cars_list(request):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 def car_detail(request, pk):
-
-    print(pk)
-    try:
-        car = Car.objects.get(pk=pk)
+    car = get_object_or_404(Car, pk=pk)
+    if request.method == 'GET':
         serializer = CarSerializer(car)
         return Response(serializer.data)
-    except Car.DoesNotExist:
-        return Response(satus=status.HTTPS_404_NOT_FOUND)
+    elif request.method == 'PUT':
+        serializer = CarSerializer(car, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
 
 
